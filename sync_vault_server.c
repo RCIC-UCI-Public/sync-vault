@@ -9,7 +9,7 @@
  *            server will ignore
  *      Server
  *          - validates request originated from port < 1024
- *          - Invokes a script (SCRIPTPATH) 
+ *          - Invokes a script (SCRIPTPATH) relative the directoryl; 
  */
 
 #include "sync_vault.h"
@@ -27,13 +27,16 @@
 #include <netdb.h>
 
 #include <syslog.h>
+#include <limits.h>
+#include <stdio.h>
+
+/* ####  Replace the name of the script and recompile ##### */
+#define SCRIPT "catarg.sh"
 
 int *
 sync_vault_ping_1_svc(int arg, struct svc_req *rqstp)
 {
 	static int  result;
-
-        char SCRIPTPATH[] = "/tmp/catarg.sh";
         struct netbuf *caller;
 	char *ipaddr;
 	int status;
@@ -81,7 +84,7 @@ sync_vault_ping_1_svc(int arg, struct svc_req *rqstp)
 	        syslog(LOG_DEBUG, "Received request from  %s", ipaddr);
 	        fprintf(stderr, "Received request from %s\n", ipaddr);
                 sprintf(sendp,"%d",sender_port);
-		status = execl(SCRIPTPATH, SCRIPTPATH, "/opt/rcic/bin/seed-vault-key", ipaddr, sendp, NULL);
+		status = execl(SCRIPT, ipaddr, sendp, NULL);
         }
         else
              status = -1;

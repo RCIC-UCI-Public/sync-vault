@@ -1,11 +1,11 @@
 
-RPCGENERATED = sync_vault_clnt.c  sync_vault.h  sync_vault_svc.c 
+RPCGENERATED = sync_vault_clnt.c  sync_vault.h  
 RPCCLIENT = sync_vault_client.c
 RCPSERVER = sync_vault_server.c
 EXES = sync_vault_client sync_vault_server
 
 CFLAGS =  -DSERVICE_NAME=\"sync_vault_server\"
-CFLAGS += -I /usr/include/tirpc -ltirpc -std=c99
+CFLAGS += -I /usr/include/tirpc -ltirpc
 
 default: build
 
