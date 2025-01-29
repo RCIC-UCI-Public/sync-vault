@@ -9,7 +9,7 @@
  *            server will ignore
  *      Server
  *          - validates request originated from port < 1024
- *          - Invokes a script (SCRIPTPATH) relative the directoryl; 
+ *          - Invokes a script (SCRIPT)
  */
 
 #include "sync_vault.h"
@@ -30,8 +30,9 @@
 #include <limits.h>
 #include <stdio.h>
 
-/* ####  Replace the name of the script and recompile ##### */
-#define SCRIPT "catarg.sh"
+/* Variables defined in sync_vault_svc.c */
+extern char scriptfile[];
+extern int DEBUG;
 
 int *
 sync_vault_ping_1_svc(int arg, struct svc_req *rqstp)
@@ -65,7 +66,8 @@ sync_vault_ping_1_svc(int arg, struct svc_req *rqstp)
 	    ipaddr = (char *)malloc(sizeof(char)*INET_ADDRSTRLEN);
             inet_ntop(AF_INET, &addr->sin_addr, ipaddr, INET_ADDRSTRLEN);
             sender_port = ntohs(addr->sin_port);
-	    fprintf(stderr, "Received request from addr %s port %d\n", ipaddr, sender_port);
+            if (DEBUG)
+	       fprintf(stderr, "Received request from addr %s port %d\n", ipaddr, sender_port);
         }
         else if (caller->len == INET6_ADDRSTRLEN)
         {
@@ -73,7 +75,8 @@ sync_vault_ping_1_svc(int arg, struct svc_req *rqstp)
 	    ipaddr = (char *)malloc(sizeof(char)*INET6_ADDRSTRLEN);
             inet_ntop(AF_INET6, &addr->sin6_addr, ipaddr, INET6_ADDRSTRLEN);
             sender_port = ntohs(addr->sin6_port);
-	    fprintf(stderr, "Received request from addr %s port %d\n", ipaddr, sender_port);
+            if (DEBUG)
+	       fprintf(stderr, "Received request from addr %s port %d\n", ipaddr, sender_port);
         }
         else
             ipaddr = NULL;
@@ -81,20 +84,28 @@ sync_vault_ping_1_svc(int arg, struct svc_req *rqstp)
 
         if (ipaddr != NULL && sender_port < 1024)
         {
-	        syslog(LOG_DEBUG, "Received request from  %s", ipaddr);
-	        fprintf(stderr, "Received request from %s\n", ipaddr);
+                if (DEBUG) {
+	            syslog(LOG_DEBUG, "Received request from  %s", ipaddr);
+	            fprintf(stderr, "Received request from %s\n", ipaddr);
+                    fprintf(stderr, "execl %s \n",scriptfile);
+                }
                 sprintf(sendp,"%d",sender_port);
-		status = execl(SCRIPT, ipaddr, sendp, NULL);
+		status = execl(scriptfile, scriptfile,ipaddr, sendp, NULL);
         }
         else
              status = -1;
         if (sender_port >= 1024)
         {
-	     fprintf(stderr, "request from unprivileged remote user (port: %d)\n",sender_port);
+             char errmsg[128];
+	     sprintf(errmsg, "Request from %s by unprivileged remote user (port: %d)\n",ipaddr,sender_port);
+             syslog(LOG_ERR,errmsg);
+             if (DEBUG)
+                 fprintf(stderr,errmsg);
              status = - sender_port;
         }
 
-	fprintf(stderr, "execl status %d\n",status);
+        if (DEBUG)
+	    fprintf(stderr, "execl status %d\n",status);
 	exit(status);
 }
 

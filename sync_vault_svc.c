@@ -19,6 +19,9 @@
 #define SIG_PF void(*)(int)
 #endif
 
+#define SCRIPT "catarg.sh"
+char scriptfile[1024];
+int DEBUG=0;
 
 void writePidFile(char * pidfile, int pid)
 {
@@ -81,30 +84,47 @@ sync_vault_1(struct svc_req *rqstp, register SVCXPRT *transp)
 }
 
 int
+printHelp(char * pidfile, char * script)
+{
+       fprintf(stderr,"sync_vault_svc [-d] [-h] [-p pidfile] [-s script]\n");
+       fprintf(stderr,"   defaults: \n");
+       fprintf(stderr,"      pidfile (%s): \n", pidfile);
+       fprintf(stderr,"      script (%s): \n",script);
+} 
+int
 main (int argc, char **argv)
 {
 
         char c;
-        int debug = 0;
         char * pidfile = "/var/run/sync-vault.pid";
         int pid;
 
         openlog(SERVICE_NAME, LOG_PID, LOG_LOCAL0);
         syslog(LOG_INFO, "starting service");
 
-        while ((c=getopt(argc,argv,"dp:")) != -1)
+        /* Initialize scriptfile */
+        strncpy(scriptfile,SCRIPT,sizeof(scriptfile));
+        scriptfile[sizeof(scriptfile)-1] = '\0';
+
+        while ((c=getopt(argc,argv,"dhp:s:")) != -1)
         {
         	switch(c)
         	{
-        		case 'd': debug = 1;
+        		case 'd': DEBUG = 1;
         			  break;
+        		case 'h': printHelp(pidfile,scriptfile);
+        			  exit(0);
         		case 'p': pidfile = optarg;
         			  break;
+        		case 's': strncpy(scriptfile,optarg,sizeof(scriptfile));
+        		          scriptfile[sizeof(scriptfile)-1] = '\0';
+        			  break;
+
         		default:  break;
         	}
         }
-        
-            if (! debug) {
+        fprintf(stderr,"   final script (%s): \n",scriptfile);
+        if (! DEBUG) {
             switch ( (pid=fork()) ) {
             case -1:
             	syslog(LOG_ERR, "%s", "cannot fork");
@@ -112,7 +132,7 @@ main (int argc, char **argv)
             case 0:			/* child process */
             	break;
             default:		/* parent process */
-            	if (debug) fprintf(stderr,"pidfile is %s\n", pidfile);
+            	if (DEBUG) fprintf(stderr,"pidfile is %s\n", pidfile);
             	writePidFile(pidfile,pid);
             	return 0;
             }
