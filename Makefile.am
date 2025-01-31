@@ -10,8 +10,9 @@ sbin_SCRIPTS = catarg.sh
 sync_vault_server_SOURCES = sync_vault_server.c sync_vault_svc.c 
 sync_vault_client_SOURCES = sync_vault_client_custom.c sync_vault_clnt.c 
 
+NEEDHEADER = $(sbin_PROGRAM:=.o)
 
-$(sbin_PROGRAMS): sync_vault.h
+$(NEEDHEADER): sync_vault.h
 
 sync_vault.h: sync_vault.x
 	rpcgen -N -h -o $@ $^ 
