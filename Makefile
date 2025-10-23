@@ -6,7 +6,7 @@ RPCHEADER = sync_vault.h
 RPCGENERATED = $(RPCCLNT) $(RPCHEADER)
 RPCCLIENT = sync_vault_client.c
 RPCSERVER = sync_vault_server.c
-EXES = sync_vault_client sync_vault_server
+EXES = sync_vault_client sync_vault_server wait-for-file
 
 CFLAGS =  -DSERVICE_NAME=\"sync_vault_server\"
 CFLAGS += -I /usr/include/tirpc -ltirpc
