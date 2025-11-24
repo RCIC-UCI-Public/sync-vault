@@ -1,4 +1,8 @@
 # To generate configure script
+# To build rpm:
+# make -f Makefile.toplevel rpm
+# TIP: sh README
 aclocal
 automake --add-missing
+autoheader
 autoreconf

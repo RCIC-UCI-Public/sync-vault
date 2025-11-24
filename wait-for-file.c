@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    fprintf(stderr, "Waiting for %s to appear in %s...\n", target_filename, dir_to_watch);
+    fprintf(stderr, "Waiting for %s to appear in %s ...\n", target_filename, dir_to_watch);
 
     char buffer[EVENT_BUF_LEN];
     while (1) {

@@ -1,6 +1,17 @@
 ## RPC-based "ping" service. Request the Server to perform its
 ## Precompiled action --> predefined script is executed on the server
 ## 
+NAME = sync-vault
+VERSION = 1.0
+RELEASE = 1
+PREFIX = /usr
+RPMDIRS = RPMS SPECS SOURCES SRPMS BUILDROOT BUILD
+
+# Get the absolute path of the current Makefile
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+# Extract the directory of the Makefile
+CWD := $(dir $(mkfile_path))
+
 RPCCLNT = sync_vault_clnt.c  
 RPCHEADER = sync_vault.h  
 RPCGENERATED = $(RPCCLNT) $(RPCHEADER)
@@ -11,7 +22,7 @@ EXES = sync_vault_client sync_vault_server wait-for-file
 CFLAGS =  -DSERVICE_NAME=\"sync_vault_server\"
 CFLAGS += -I /usr/include/tirpc -ltirpc
 
-default: build
+default: rpm
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -36,7 +47,19 @@ sync_vault_client: sync_vault_clnt.o sync_vault_client_custom.o $(RPCHEADER)
 sync_vault_client_auto: sync_vault_clnt.o  sync_vault_client.o
 	$(CC) $(CFLAGS) -o $@ $^
 
+rpmdirs:
+	- mkdir $(RPMDIRS)
+
+tarball: rpmdirs
+	- rm -rf $(NAME)-$(VERSION)
+	mkdir $(NAME)-$(VERSION)
+	find . -maxdepth 1 -type f -exec install {} $(NAME)-$(VERSION) \;
+	tar czf SOURCES/$(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION) 
+
+rpm: tarball
+	rpmbuild --define "_topdir $(CWD)" --define "_prefix $(PREFIX)" -bb $(NAME).spec
+
 build: $(RPCHEADER) $(EXES) 
 
 clean::
-	rm -rf $(EXES) $(RPCCLIENT) $(RPCGENERATED) *.o
+	rm -rf $(EXES) $(RPCCLIENT) $(RPCGENERATED) $(RPMDIRS) $(NAME)-$(VERSION) *.o
