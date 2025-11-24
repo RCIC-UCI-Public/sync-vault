@@ -14,7 +14,7 @@ AC_CONFIG_FILES([
 AC_CHECK_LIB([tirpc], [svc_run])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h syslog.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h memory.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h syslog.h unistd.h sys/inotify.h sys/stat.h errno.h ])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
