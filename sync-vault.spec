@@ -35,7 +35,7 @@ make
 rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
 %files
-%{_prefix}/sbin/*
+%{_prefix}/*bin/*
 %changelog
 * Fri Nov 21 2025 User <user@example.com> - 1.0-1
 - Initial package.
